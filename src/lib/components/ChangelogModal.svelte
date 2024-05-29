@@ -1,15 +1,13 @@
 <script lang="ts">
-	import { onMount, getContext } from 'svelte';
+	import { onMount } from 'svelte';
 	import { Confetti } from 'svelte-confetti';
-
 	import { WEBUI_NAME, config } from '$lib/stores';
-
 	import { WEBUI_VERSION } from '$lib/constants';
 	import { getChangelog } from '$lib/apis';
-
 	import Modal from './common/Modal.svelte';
+	import { getI18nContext } from '$lib/i18n';
 
-	const i18n = getContext('i18n');
+	const i18n = getI18nContext();
 
 	export let show = false;
 
@@ -32,7 +30,7 @@
 			<button
 				class="self-center"
 				on:click={() => {
-					localStorage.version = $config.version;
+					localStorage.version = $config?.version;
 					show = false;
 				}}
 			>

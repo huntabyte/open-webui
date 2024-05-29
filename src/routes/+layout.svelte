@@ -1,9 +1,8 @@
-<script>
-	import { onMount, tick, setContext } from 'svelte';
+<script lang="ts">
+	import { onMount, tick, onDestroy } from 'svelte';
 	import { config, user, theme, WEBUI_NAME, mobile } from '$lib/stores';
 	import { goto } from '$app/navigation';
 	import { Toaster, toast } from 'svelte-sonner';
-
 	import { getBackendConfig } from '$lib/apis';
 	import { getSessionUser } from '$lib/apis/auths';
 
@@ -13,24 +12,25 @@
 	import 'tippy.js/dist/tippy.css';
 
 	import { WEBUI_BASE_URL } from '$lib/constants';
-	import i18n, { initI18n } from '$lib/i18n';
+	import i18n, { initI18n, setI18nContext } from '$lib/i18n';
 
-	setContext('i18n', i18n);
+	setI18nContext(i18n);
 
 	let loaded = false;
 	const BREAKPOINT = 768;
+
+	const onResize = () => {
+		if (window.innerWidth < BREAKPOINT) {
+			mobile.set(true);
+		} else {
+			mobile.set(false);
+		}
+	};
 
 	onMount(async () => {
 		theme.set(localStorage.theme);
 
 		mobile.set(window.innerWidth < BREAKPOINT);
-		const onResize = () => {
-			if (window.innerWidth < BREAKPOINT) {
-				mobile.set(true);
-			} else {
-				mobile.set(false);
-			}
-		};
 
 		window.addEventListener('resize', onResize);
 
@@ -47,9 +47,9 @@
 
 		if (backendConfig) {
 			// Save Backend Status to Store
-			await config.set(backendConfig);
+			config.set(backendConfig);
 
-			await WEBUI_NAME.set(backendConfig.name);
+			WEBUI_NAME.set(backendConfig.name);
 
 			if ($config) {
 				if (localStorage.token) {
@@ -61,7 +61,7 @@
 
 					if (sessionUser) {
 						// Save Session User to Store
-						await user.set(sessionUser);
+						user.set(sessionUser);
 					} else {
 						// Redirect Invalid Session User to /auth Page
 						localStorage.removeItem('token');
@@ -80,10 +80,10 @@
 
 		document.getElementById('splash-screen')?.remove();
 		loaded = true;
+	});
 
-		return () => {
-			window.removeEventListener('resize', onResize);
-		};
+	onDestroy(() => {
+		window.removeEventListener('resize', onResize);
 	});
 </script>
 

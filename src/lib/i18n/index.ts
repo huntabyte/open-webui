@@ -3,6 +3,7 @@ import resourcesToBackend from 'i18next-resources-to-backend';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import type { i18n as i18nType } from 'i18next';
 import { writable } from 'svelte/store';
+import { getContext, setContext } from 'svelte';
 
 const createI18nStore = (i18n: i18nType) => {
 	const i18nWritable = writable(i18n);
@@ -37,6 +38,8 @@ const createIsLoadingStore = (i18n: i18nType) => {
 	return isLoading;
 };
 
+export type I18nStore = ReturnType<typeof createI18nStore>;
+
 export const initI18n = (defaultLocale: string | undefined) => {
 	let detectionOrder = defaultLocale
 		? ['querystring', 'localStorage']
@@ -70,6 +73,16 @@ export const initI18n = (defaultLocale: string | undefined) => {
 
 const i18n = createI18nStore(i18next);
 const isLoadingStore = createIsLoadingStore(i18next);
+
+const I18N_CTX_KEY = 'i18n';
+
+export function setI18nContext(i18nStore: I18nStore) {
+	return setContext(I18N_CTX_KEY, i18nStore);
+}
+
+export function getI18nContext(): I18nStore {
+	return getContext(I18N_CTX_KEY);
+}
 
 export const getLanguages = async () => {
 	const languages = (await import(`./locales/languages.json`)).default;
